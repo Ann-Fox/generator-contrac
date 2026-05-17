@@ -1,6 +1,8 @@
 import tkinter as tk
+from datetime import datetime
 from tkinter import font
 import tkinter.messagebox as box
+
 
 # Ограничение ввода только цифрами
 def validate_input_only_numbers(in_str, acttyp):
@@ -17,10 +19,14 @@ def validate_input_only_letters(in_str, acttyp):
 def replace_in_contract(data):
     # Словарь соответствия между ключами data и метками в файле
     mapping = {
-        "entry_last_name": "%last_name%",
-        "entry_first_name": "%first_name%",
-        "entry_patronymic": "%patronymic%",
-        "entry_date_birth": "%date_birth%"
+        "entry_last_name_buyer": "%last_name_buyer%",
+        "entry_first_name_buyer": "%first_name_buyer%",
+        "entry_patronymic_buyer": "%patronymic_buyer%",
+        "entry_date_birth_buyer": "%date_birth_buyer%",
+        "entry_series_number_buyer": "%series_number_buyer%",
+        "entry_date_issue_buyer": "%date_issue_buyer%",
+        "entry_issue_buyer": "%issue_buyer%",
+
     }
     print('replace_in_contract', data)
     print('mapping', mapping)
@@ -36,19 +42,28 @@ def replace_in_contract(data):
 
     print(content)
 
-    with open(file_path, 'w', encoding="utf-8") as file:
+    # Генерируем новое имя файла: договор_Фамилия_ГГГГ_ММ_ДД.txt
+    last_name = data.get("entry_last_name_buyer", "покупатель")
+    timestamp = datetime.now().strftime("%Y_%m_%d")
+    new_file_name = f"dogovor_{last_name}_{timestamp}.txt"
+    print(last_name, timestamp, new_file_name)
+
+    with open(new_file_name, 'w', encoding="utf-8") as file:
         file.write(content)
 
-    print('Договор успешно обновлен')
+    print(f'Договор сохранён в файл: {new_file_name}')
 
 
 # Записываем данные из формы в словарь
 def write_values():
     data = {
-        "entry_last_name": entry_last_name.get(),
-        "entry_first_name": entry_first_name.get(),
-        "entry_patronymic": entry_patronymic.get(),
-        "entry_date_birth": entry_date_birth.get()
+        "entry_last_name_buyer": entry_last_name_buyer.get(),
+        "entry_first_name_buyer": entry_first_name_buyer.get(),
+        "entry_patronymic_buyer": entry_patronymic_buyer.get(),
+        "entry_date_birth_buyer": entry_date_birth_buyer.get(),
+        "entry_series_number_buyer": entry_series_number_buyer.get(),
+        "entry_date_issue_buyer": entry_date_issue_buyer.get(),
+        "entry_issue_buyer": entry_issue_buyer.get("1.0", tk.END).strip()
     }
     print(data)
     replace_in_contract(data)
@@ -104,32 +119,38 @@ lb_empty_1 = tk.Label(frame_personal, text = " ", font = frame_font)
 lb_empty_2 = tk.Label(frame_personal, text = " ", font = frame_font)
 lb_empty_3 = tk.Label(frame_personal, text = " ", font = frame_font)
 
-entry_last_name = tk.Entry(frame_personal, font = label_font)
-lb_last_name = tk.Label(frame_personal, text = "Фамилия: ", font = label_font)
-
-entry_first_name = tk.Entry(frame_personal, font = label_font)
-lb_first_name = tk.Label(frame_personal, text = "Имя: ", font = label_font)
-
-entry_patronymic = tk.Entry(frame_personal, font = label_font, validate='key')
-entry_patronymic['validatecommand'] = (entry_patronymic.
+lb_last_name_buyer = tk.Label(frame_personal, text = "Фамилия: ", font = label_font)
+entry_last_name_buyer = tk.Entry(frame_personal, font = label_font, validate='key')
+entry_last_name_buyer['validatecommand'] = (entry_last_name_buyer.
                                        register(validate_input_only_letters),
                                        '%P', '%d')
-lb_patronymic = tk.Label(frame_personal, text = "Отчество: ", font = label_font)
 
-entry_date_birth = tk.Entry(frame_personal, font = label_font)
-lb_date_birth = tk.Label(frame_personal, text = "Дата рождения: ", font = label_font)
+lb_first_name_buyer = tk.Label(frame_personal, text = "Имя: ", font = label_font)
+entry_first_name_buyer = tk.Entry(frame_personal, font = label_font, validate='key')
+entry_first_name_buyer['validatecommand'] = (entry_first_name_buyer.
+                                       register(validate_input_only_letters),
+                                       '%P', '%d')
 
-lb_last_name.grid(row = 1, column = 1)
-entry_last_name.grid(row = 1, column = 2)
+lb_patronymic_buyer = tk.Label(frame_personal, text = "Отчество: ", font = label_font)
+entry_patronymic_buyer = tk.Entry(frame_personal, font = label_font, validate='key')
+entry_patronymic_buyer['validatecommand'] = (entry_patronymic_buyer.
+                                       register(validate_input_only_letters),
+                                       '%P', '%d')
+
+entry_date_birth_buyer = tk.Entry(frame_personal, font = label_font)
+lb_date_birth_buyer = tk.Label(frame_personal, text = "Дата рождения: ", font = label_font)
+
+lb_last_name_buyer.grid(row = 1, column = 1)
+entry_last_name_buyer.grid(row = 1, column = 2)
 lb_empty_1.grid(row = 2)
-lb_first_name.grid(row = 3, column = 1)
-entry_first_name.grid(row = 3, column = 2)
+lb_first_name_buyer.grid(row = 3, column = 1)
+entry_first_name_buyer.grid(row = 3, column = 2)
 lb_empty_2.grid(row = 4)
-lb_patronymic.grid(row = 5, column = 1)
-entry_patronymic.grid(row = 5, column = 2)
+lb_patronymic_buyer.grid(row = 5, column = 1)
+entry_patronymic_buyer.grid(row = 5, column = 2)
 lb_empty_3.grid(row = 6)
-lb_date_birth.grid(row = 7, column = 1)
-entry_date_birth.grid(row = 7, column = 2)
+lb_date_birth_buyer.grid(row = 7, column = 1)
+entry_date_birth_buyer.grid(row = 7, column = 2)
 
 frame_passport = tk.LabelFrame(scrollable_frame, text = "Паспортные данные", font = frame_font)
 frame_passport.pack(padx = 20, pady = 20, fill = tk.X)
@@ -138,28 +159,25 @@ lb_empty_1_passport = tk.Label(frame_passport, text = " ", font = label_font)
 lb_empty_2_passport = tk.Label(frame_passport, text = " ", font = label_font)
 lb_empty_3_passport = tk.Label(frame_passport, text = " ", font = label_font)
 
-entry_series_number = tk.Entry(frame_passport,
-                               font = label_font,
-                               validate="key")
-entry_series_number['validatecommand'] =\
-    (entry_series_number.register(validate_input_only_numbers), '%P', '%d')
-# validate_input_only_numbers
-lb_series_number = tk.Label(frame_passport, text = "Серия номер: ", font = label_font)
+lb_series_number_buyer = tk.Label(frame_passport, text = "Серия номер: ", font = label_font)
+entry_series_number_buyer = tk.Entry(frame_passport, font = label_font, validate="key")
+entry_series_number_buyer['validatecommand'] =\
+    (entry_series_number_buyer.register(validate_input_only_numbers), '%P', '%d')
 
-entry_date_issue = tk.Entry(frame_passport, font = label_font)
-lb_date_issue = tk.Label(frame_passport, text = "Дата выдачи: ", font = label_font)
+lb_date_issue_buyer = tk.Label(frame_passport, text = "Дата выдачи: ", font = label_font)
+entry_date_issue_buyer = tk.Entry(frame_passport, font = label_font)
 
-entry_issue = tk.Text(frame_passport, width = 30, height = 5, font = frame_font, wrap = tk.WORD)
-lb_issue = tk.Label(frame_passport, text = "Кем выдан: ", font = label_font)
+lb_issue_buyer = tk.Label(frame_passport, text = "Кем выдан: ", font = label_font)
+entry_issue_buyer = tk.Text(frame_passport, width = 30, height = 5, font = frame_font, wrap = tk.WORD)
 
-lb_series_number.grid(row = 1, column = 1)
-entry_series_number.grid(row = 1, column = 2)
+lb_series_number_buyer.grid(row = 1, column = 1)
+entry_series_number_buyer.grid(row = 1, column = 2)
 lb_empty_1_passport.grid(row = 2)
-lb_date_issue.grid(row = 3, column = 1)
-entry_date_issue.grid(row = 3, column = 2)
+lb_date_issue_buyer.grid(row = 3, column = 1)
+entry_date_issue_buyer.grid(row = 3, column = 2)
 lb_empty_2_passport.grid(row = 4)
-lb_issue.grid(row = 5, column = 1)
-entry_issue.grid(row = 5, column = 2)
+lb_issue_buyer.grid(row = 5, column = 1)
+entry_issue_buyer.grid(row = 5, column = 2)
 
 # --- Кнопка (row = 2) ---
 def dialog():
