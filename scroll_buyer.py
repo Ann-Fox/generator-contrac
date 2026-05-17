@@ -3,19 +3,8 @@ from datetime import datetime
 from tkinter import font
 import tkinter.messagebox as box
 from tkcalendar import Calendar
-
-
-# Ограничение ввода только цифрами
-def validate_input_only_numbers(in_str, acttyp):
-    if acttyp == '1':
-        return in_str.isdigit()
-    return True
-
-# Ограничение ввода только буквами
-def validate_input_only_letters(in_str, acttyp):
-    if acttyp == '1':
-        return in_str[-1].isalpha()
-    return True
+from utils import validate_input_only_numbers
+from utils import validate_input_only_letters
 
 def replace_in_contract(data):
     # Словарь соответствия между ключами data и метками в файле
