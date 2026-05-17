@@ -2,6 +2,7 @@ import tkinter as tk
 from datetime import datetime
 from tkinter import font
 import tkinter.messagebox as box
+from tkcalendar import Calendar
 
 
 # Ограничение ввода только цифрами
@@ -43,15 +44,16 @@ def replace_in_contract(data):
     print(content)
 
     # Генерируем новое имя файла: договор_Фамилия_ГГГГ_ММ_ДД.txt
-    last_name = data.get("entry_last_name_buyer", "покупатель")
-    timestamp = datetime.now().strftime("%Y_%m_%d")
-    new_file_name = f"dogovor_{last_name}_{timestamp}.txt"
-    print(last_name, timestamp, new_file_name)
+    # last_name = data.get("entry_last_name_buyer", "покупатель")
+    # timestamp = datetime.now().strftime("%Y_%m_%d")
+    # new_file_name = f"dogovor_{last_name}_{timestamp}.txt"
+    # print(last_name, timestamp, new_file_name)
 
-    with open(new_file_name, 'w', encoding="utf-8") as file:
+    with open(file_path, 'w', encoding="utf-8") as file:
         file.write(content)
 
-    print(f'Договор сохранён в файл: {new_file_name}')
+    # print(f'Договор сохранён в файл: {new_file_name}')
+    print(f'Договор успешно обновлен')
 
 
 # Записываем данные из формы в словарь
@@ -68,6 +70,29 @@ def write_values():
     print(data)
     replace_in_contract(data)
     return data
+
+# Добавляем функцию для показа календаря
+def show_calendar(entry_widget):
+    """Открывает окно с календарем и вставляет выбранную дату в поле ввода."""
+    def select_date():
+        # Получаем выбранную дату в формате ДД.ММ.ГГГГ
+        selected_date = cal.get_date() #возвращает выбранную пользователем дату в нужном формате (dd.mm.yyyy)
+        entry_widget.delete(0, tk.END)
+        entry_widget.insert(0, selected_date)
+        top.destroy()
+
+    top = tk.Toplevel()
+    top.title("Выбор даты")
+    top.geometry("300x250")
+    top.grab_set()  # Делаем окно модальным (гарантирует, что пользователь не сможет взаимодействовать с главным окном, пока не закроет календарь)
+
+    # Создаем виджет календаря
+    cal = Calendar(top, selectmode='day', date_pattern='dd.mm.yyyy')
+    cal.pack(pady=20)
+
+    # Кнопка для подтверждения выбора
+    select_btn = tk.Button(top, text="Выбрать", command=select_date)
+    select_btn.pack()
 
 
 # ----------- Tkinter -----------
@@ -139,6 +164,7 @@ entry_patronymic_buyer['validatecommand'] = (entry_patronymic_buyer.
 
 entry_date_birth_buyer = tk.Entry(frame_personal, font = label_font)
 lb_date_birth_buyer = tk.Label(frame_personal, text = "Дата рождения: ", font = label_font)
+entry_date_birth_buyer.bind("<Button-1>", lambda event: show_calendar(entry_date_birth_buyer))
 
 lb_last_name_buyer.grid(row = 1, column = 1)
 entry_last_name_buyer.grid(row = 1, column = 2)
@@ -166,6 +192,7 @@ entry_series_number_buyer['validatecommand'] =\
 
 lb_date_issue_buyer = tk.Label(frame_passport, text = "Дата выдачи: ", font = label_font)
 entry_date_issue_buyer = tk.Entry(frame_passport, font = label_font)
+entry_date_issue_buyer.bind("<Button-1>", lambda event: show_calendar(entry_date_issue_buyer))
 
 lb_issue_buyer = tk.Label(frame_passport, text = "Кем выдан: ", font = label_font)
 entry_issue_buyer = tk.Text(frame_passport, width = 30, height = 5, font = frame_font, wrap = tk.WORD)

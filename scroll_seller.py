@@ -2,6 +2,8 @@ import tkinter as tk
 from datetime import datetime
 from tkinter import font
 import tkinter.messagebox as box
+from tkcalendar import Calendar
+
 
 # Ограничение ввода только цифрами
 def validate_input_only_numbers(in_str, acttyp):
@@ -78,6 +80,29 @@ def write_values():
     replace_in_contract(data)
     return data
 
+# Добавляем функцию для показа календаря
+def show_calendar(entry_widget):
+    """Открывает окно с календарем и вставляет выбранную дату в поле ввода."""
+    def select_date():
+        # Получаем выбранную дату в формате ДД.ММ.ГГГГ
+        selected_date = cal.get_date() #возвращает выбранную пользователем дату в нужном формате (dd.mm.yyyy)
+        entry_widget.delete(0, tk.END)
+        entry_widget.insert(0, selected_date)
+        top.destroy()
+
+    top = tk.Toplevel()
+    top.title("Выбор даты")
+    top.geometry("300x250")
+    top.grab_set()  # Делаем окно модальным (гарантирует, что пользователь не сможет взаимодействовать с главным окном, пока не закроет календарь)
+
+    # Создаем виджет календаря
+    cal = Calendar(top, selectmode='day', date_pattern='dd.mm.yyyy')
+    cal.pack(pady=20)
+
+    # Кнопка для подтверждения выбора
+    select_btn = tk.Button(top, text="Выбрать", command=select_date)
+    select_btn.pack()
+
 
 # ----------- Tkinter -----------
 window = tk.Tk()
@@ -148,6 +173,7 @@ entry_patronymic_seller['validatecommand'] = (entry_patronymic_seller.
 
 lb_date_birth_seller = tk.Label(frame_personal, text = "Дата рождения: ", font = label_font)
 entry_date_birth_seller = tk.Entry(frame_personal, font = label_font,  validate='key')
+entry_date_birth_seller.bind("<Button-1>", lambda event: show_calendar(entry_date_birth_seller))
 
 lb_last_name_seller.grid(row = 1, column = 1)
 entry_last_name_seller.grid(row = 1, column = 2)
@@ -175,6 +201,7 @@ entry_series_number_seller['validatecommand'] =\
 
 lb_date_issue_seller = tk.Label(frame_passport, text = "Дата выдачи: ", font = label_font)
 entry_date_issue_seller = tk.Entry(frame_passport, font = label_font)
+entry_date_issue_seller.bind("<Button-1>", lambda event: show_calendar(entry_date_issue_seller))
 
 lb_issue_seller = tk.Label(frame_passport, text = "Кем выдан: ", font = label_font)
 entry_issue_seller = tk.Text(frame_passport, width = 30, height = 5, font = frame_font, wrap = tk.WORD)
