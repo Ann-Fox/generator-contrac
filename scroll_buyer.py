@@ -6,6 +6,7 @@ from tkcalendar import Calendar
 from utils import validate_input_only_numbers
 from utils import validate_input_only_letters
 
+
 def replace_in_contract(data):
     # Словарь соответствия между ключами data и метками в файле
     mapping = {
@@ -59,6 +60,45 @@ def write_values():
     print(data)
     replace_in_contract(data)
     return data
+
+def validate_and_highlight():
+    """
+    Проверяет все поля на пустоту. Возвращает список названий незаполненных полей.
+    Пустые поля подсвечивает красным цветом, заполненные сбрасывает к белому.
+    """
+    fields = [
+        (entry_last_name_buyer, "Фамилия"),
+        (entry_first_name_buyer, "Имя"),
+        (entry_patronymic_buyer, "Отчество"),
+        (entry_date_birth_buyer, "Дата рождения"),
+        (entry_series_number_buyer, "Серия номер"),
+        (entry_date_issue_buyer, "Дата выдачи"),
+        (entry_issue_buyer, "Кем выдан")
+    ]
+
+    # Сбрасываем цвет фона у всех полей
+    '''
+    Подчёркивание используется, потому что название поля здесь не нужно – мы его игнорируем. 
+    Это стандартное соглашение в Python для переменной, которая не будет использоваться.
+    '''
+    for widget, _ in fields:
+        widget.config(bg="white")
+
+
+    errors = []
+    for widget, field_name in fields:
+        # Получаем значение в зависимости от типа виджета
+        if isinstance(widget, tk.Text):
+            value = widget.get("1.0", tk.END).strip()
+        else:
+            value = widget.get().strip()
+
+        if not value:  # если поле пустое
+            errors.append(field_name)
+            # Подсвечиваем красным
+            widget.config(bg="#ffcccc")
+    return errors
+
 
 # Добавляем функцию для показа календаря
 def show_calendar(entry_widget):
@@ -195,19 +235,25 @@ lb_empty_2_passport.grid(row = 4)
 lb_issue_buyer.grid(row = 5, column = 1)
 entry_issue_buyer.grid(row = 5, column = 2)
 
+
 # --- Кнопка (row = 2) ---
 def dialog():
     var = box.askyesno("Выбор действий", "Завершить заполнение данных?")
     if var == 1:
-        write_values()
-        box.showwarning("Прекращение", "Данные внесены в договор")
-
+        errors = validate_and_highlight()
+        if errors:
+            box.showwarning("Ошибка", "Следующие поля обязательны для заполнения:\n" + '\n'.join(errors))
+        else:
+            write_values()
+            box.showwarning("Прекращение", "Данные внесены в договор")
     else:
         box.showinfo("Продолжение", "Продолжаем заполнение...")
+
 
 btn = tk.Button(window, text = "Выбор решения", bg = "red", fg = "#00ff00",
                 width = 20, font = ("Arial", 16, "bold"), command = dialog)
 btn.grid(row = 2, column = 0, pady = 20)   # pady - отступ снизу, кнопка автоматически центрируется по горизонтали
+
 
 # Принудительно обновляем scrollregion
 scrollable_frame.update_idletasks()
