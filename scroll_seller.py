@@ -5,6 +5,14 @@ import tkinter.messagebox as box
 from tkcalendar import Calendar
 from utils import validate_input_only_numbers
 from utils import validate_input_only_letters
+import sys
+
+# Получаем путь к файлу договора из аргумента командной строки
+if len(sys.argv) > 1:
+    contract_file_path = sys.argv[1]
+else:
+    contract_file_path = 'dogovor.txt'  # значение по умолчанию
+
 
 # Записываем данные из формы в словарь
 def replace_in_contract(data):
@@ -24,7 +32,7 @@ def replace_in_contract(data):
     print('replace_in_contract', data)
     print('mapping', mapping)
 
-    file_path = 'dogovor.txt'
+    file_path = contract_file_path
     with open(file_path, 'r', encoding="utf-8") as file:
         content = file.read()
         print(content)
