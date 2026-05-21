@@ -1,5 +1,4 @@
 import tkinter as tk
-from datetime import datetime
 from tkinter import font
 import tkinter.messagebox as box
 from tkcalendar import Calendar
@@ -40,18 +39,11 @@ def replace_in_contract(data):
 
     print(content)
 
-    # Генерируем новое имя файла: договор_Фамилия_ГГГГ_ММ_ДД.txt
-    # last_name = data.get("entry_last_name_buyer", "покупатель")
-    # timestamp = datetime.now().strftime("%Y_%m_%d")
-    # new_file_name = f"dogovor_{last_name}_{timestamp}.txt"
-    # print(last_name, timestamp, new_file_name)
 
     with open(file_path, 'w', encoding="utf-8") as file:
         file.write(content)
 
-    # print(f'Договор сохранён в файл: {new_file_name}')
     print(f'Договор успешно обновлен')
-
 
 # Записываем данные из формы в словарь
 def write_values():
@@ -74,13 +66,13 @@ def validate_and_highlight():
     Пустые поля подсвечивает красным цветом, заполненные сбрасывает к белому.
     """
     fields = [
-        (entry_last_name_buyer, "Фамилия"),
-        (entry_first_name_buyer, "Имя"),
-        (entry_patronymic_buyer, "Отчество"),
-        (entry_date_birth_buyer, "Дата рождения"),
-        (entry_series_number_buyer, "Серия номер"),
-        (entry_date_issue_buyer, "Дата выдачи"),
-        (entry_issue_buyer, "Кем выдан")
+        (entry_last_name_buyer, "Фамилия", False),
+        (entry_first_name_buyer, "Имя", False),
+        (entry_patronymic_buyer, "Отчество", False),
+        (entry_date_birth_buyer, "Дата рождения", True),
+        (entry_series_number_buyer, "Серия номер", False),
+        (entry_date_issue_buyer, "Дата выдачи", True),
+        (entry_issue_buyer, "Кем выдан", False)
     ]
 
     # Сбрасываем цвет фона у всех полей
@@ -88,12 +80,14 @@ def validate_and_highlight():
     Подчёркивание используется, потому что название поля здесь не нужно – мы его игнорируем. 
     Это стандартное соглашение в Python для переменной, которая не будет использоваться.
     '''
-    for widget, _ in fields:
-        widget.config(bg="white")
-
+    for widget, _, readonly in fields:
+        if readonly:
+            widget.config(readonlybackground="white")
+        else:
+            widget.config(bg="white")
 
     errors = []
-    for widget, field_name in fields:
+    for widget, field_name, readonly in fields:
         # Получаем значение в зависимости от типа виджета
         if isinstance(widget, tk.Text):
             value = widget.get("1.0", tk.END).strip()
@@ -103,7 +97,11 @@ def validate_and_highlight():
         if not value:  # если поле пустое
             errors.append(field_name)
             # Подсвечиваем красным
-            widget.config(bg="#ffcccc")
+            if readonly:
+                widget.config(readonlybackground="#ffcccc")
+            else:
+                widget.config(bg="#ffcccc")
+
     return errors
 
 
@@ -113,8 +111,12 @@ def show_calendar(entry_widget):
     def select_date():
         # Получаем выбранную дату в формате ДД.ММ.ГГГГ
         selected_date = cal.get_date() #возвращает выбранную пользователем дату в нужном формате (dd.mm.yyyy)
+        # Временно разрешаем редактирование
+        entry_widget.config(state='normal')
         entry_widget.delete(0, tk.END)
         entry_widget.insert(0, selected_date)
+        # Снова блокируем ручной ввод
+        entry_widget.config(state='readonly')
         top.destroy()
 
     top = tk.Toplevel()
@@ -201,6 +203,7 @@ entry_patronymic_buyer['validatecommand'] = (entry_patronymic_buyer.
 entry_date_birth_buyer = tk.Entry(frame_personal, font = label_font)
 lb_date_birth_buyer = tk.Label(frame_personal, text = "Дата рождения: ", font = label_font)
 entry_date_birth_buyer.bind("<Button-1>", lambda event: show_calendar(entry_date_birth_buyer))
+entry_date_birth_buyer.config(state='readonly', readonlybackground='white')
 
 lb_last_name_buyer.grid(row = 1, column = 1)
 entry_last_name_buyer.grid(row = 1, column = 2)
@@ -229,6 +232,8 @@ entry_series_number_buyer['validatecommand'] =\
 lb_date_issue_buyer = tk.Label(frame_passport, text = "Дата выдачи: ", font = label_font)
 entry_date_issue_buyer = tk.Entry(frame_passport, font = label_font)
 entry_date_issue_buyer.bind("<Button-1>", lambda event: show_calendar(entry_date_issue_buyer))
+# Делаем поле только для выбора через календарь, с белым фоном
+entry_date_issue_buyer.config(state='readonly', readonlybackground='white')
 
 lb_issue_buyer = tk.Label(frame_passport, text = "Кем выдан: ", font = label_font)
 entry_issue_buyer = tk.Text(frame_passport, width = 30, height = 5, font = frame_font, wrap = tk.WORD)

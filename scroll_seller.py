@@ -1,5 +1,4 @@
 import tkinter as tk
-from datetime import datetime
 from tkinter import font
 import tkinter.messagebox as box
 from tkcalendar import Calendar
@@ -43,21 +42,10 @@ def replace_in_contract(data):
 
     print(content)
 
-    # Генерируем новое имя файла: договор_Фамилия_ГГГГ_ММ_ДД.txt
-    # last_name = data.get("entry_last_name_seller", "продавец")
-    # timestamp = datetime.now().strftime("%Y_%m_%d")
-    # new_file_name = f"dogovor_{last_name}_{timestamp}.txt"
-    # print(last_name, timestamp, new_file_name)
-
-    # with open(new_file_name, 'w', encoding="utf-8") as file:
-    #     file.write(content)
-    # 
-    # print(f'Договор сохранён в файл: {new_file_name}')
 
     with open(file_path, 'w', encoding="utf-8") as file:
         file.write(content)
 
-        # print(f'Договор сохранён в файл: {new_file_name}')
     print(f'Договор успешно обновлен')
 
 # Записываем данные из формы в словарь
@@ -77,14 +65,63 @@ def write_values():
     replace_in_contract(data)
     return data
 
+def validate_and_highlight():
+    """
+    Проверяет все поля на пустоту. Возвращает список названий незаполненных полей.
+    Пустые поля подсвечивает красным цветом, заполненные сбрасывает к белому.
+    """
+    fields = [
+        (entry_last_name_seller, "Фамилия", False),
+        (entry_first_name_seller, "Имя", False),
+        (entry_patronymic_seller, "Отчество", False),
+        (entry_date_birth_seller, "Дата рождения", True),
+        (entry_series_number_seller, "Серия номер", False),
+        (entry_date_issue_seller, "Дата выдачи", True),
+        (entry_issue_seller, "Кем выдан", False),
+        (entry_cadastral_number_seller, "Кадастровый номер", False),
+        (entry_address_seller, "Адрес объекта", False)
+    ]
+
+    # Сбрасываем цвет фона у всех полей
+    '''
+    Подчёркивание используется, потому что название поля здесь не нужно – мы его игнорируем. 
+    Это стандартное соглашение в Python для переменной, которая не будет использоваться.
+    '''
+    for widget, _, readonly in fields:
+        if readonly:
+            widget.config(readonlybackground="white")
+        else:
+            widget.config(bg="white")
+
+    errors = []
+    for widget, field_name, readonly in fields:
+        # Получаем значение в зависимости от типа виджета
+        if isinstance(widget, tk.Text):
+            value = widget.get("1.0", tk.END).strip()
+        else:
+            value = widget.get().strip()
+
+        if not value:  # если поле пустое
+            errors.append(field_name)
+            # Подсвечиваем красным
+            if readonly:
+                widget.config(readonlybackground="#ffcccc")
+            else:
+                widget.config(bg="#ffcccc")
+    return errors
+
 # Добавляем функцию для показа календаря
 def show_calendar(entry_widget):
     """Открывает окно с календарем и вставляет выбранную дату в поле ввода."""
     def select_date():
         # Получаем выбранную дату в формате ДД.ММ.ГГГГ
         selected_date = cal.get_date() #возвращает выбранную пользователем дату в нужном формате (dd.mm.yyyy)
+        # Временно разрешаем редактирование
+        entry_widget.config(state='normal')
         entry_widget.delete(0, tk.END)
         entry_widget.insert(0, selected_date)
+        # Снова блокируем ручной ввод
+        entry_widget.config(state='readonly')
         top.destroy()
 
     top = tk.Toplevel()
@@ -171,6 +208,7 @@ entry_patronymic_seller['validatecommand'] = (entry_patronymic_seller.
 lb_date_birth_seller = tk.Label(frame_personal, text = "Дата рождения: ", font = label_font)
 entry_date_birth_seller = tk.Entry(frame_personal, font = label_font,  validate='key')
 entry_date_birth_seller.bind("<Button-1>", lambda event: show_calendar(entry_date_birth_seller))
+entry_date_birth_seller.config(state='readonly', readonlybackground='white')
 
 lb_last_name_seller.grid(row = 1, column = 1)
 entry_last_name_seller.grid(row = 1, column = 2)
@@ -199,6 +237,8 @@ entry_series_number_seller['validatecommand'] =\
 lb_date_issue_seller = tk.Label(frame_passport, text = "Дата выдачи: ", font = label_font)
 entry_date_issue_seller = tk.Entry(frame_passport, font = label_font)
 entry_date_issue_seller.bind("<Button-1>", lambda event: show_calendar(entry_date_issue_seller))
+# Делаем поле только для выбора через календарь, с белым фоном
+entry_date_issue_seller.config(state='readonly', readonlybackground='white')
 
 lb_issue_seller = tk.Label(frame_passport, text = "Кем выдан: ", font = label_font)
 entry_issue_seller = tk.Text(frame_passport, width = 30, height = 5, font = frame_font, wrap = tk.WORD)
@@ -235,8 +275,12 @@ entry_address_seller.grid(row = 3, column = 2)
 def dialog():
     var = box.askyesno("Выбор действий", "Завершить заполнение данных?")
     if var == 1:
-        write_values()
-        box.showwarning("Прекращение", "Данные внесены в договор")
+        errors = validate_and_highlight()
+        if errors:
+            box.showwarning("Ошибка", "Следующие поля обязательны для заполнения:\n" + '\n'.join(errors))
+        else:
+            write_values()
+            box.showwarning("Прекращение", "Данные внесены в договор")
     else:
         box.showinfo("Продолжение", "Продолжаем заполнение...")
 

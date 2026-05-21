@@ -4,6 +4,8 @@ import os
 import subprocess
 import sys
 import shutil
+from datetime import datetime
+
 
 def select_file():
     global selected_file
@@ -36,16 +38,8 @@ def create_new_file():
         return
 
     # Генерируем имя нового файла на основе текущей даты
-    from datetime import datetime
     base_name = datetime.now().strftime("%Y_%m_%d_%H_%M_%S")
     new_file_name = f"{base_name}.txt"
-
-    # Если файл уже существует, добавляем суффикс _1, _2 и т.д.
-    # counter = 1
-    # original_name = new_file_name
-    # while os.path.exists(new_file_name):
-    #     new_file_name = f"{base_name}_{counter}.txt"
-    #     counter += 1
 
     # Копируем шаблон
     shutil.copy(template_path, new_file_name)
